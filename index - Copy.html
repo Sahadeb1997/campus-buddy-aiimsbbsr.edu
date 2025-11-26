@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Campus Buddy Directory</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-dark: #4338ca;
+            --secondary: #0ea5e9;
+            --accent: #8b5cf6;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --dark: #0f172a;
+            --light: #f8fafc;
+            --gray: #64748b;
+            --white: #ffffff;
+            --glass: rgba(255, 255, 255, 0.95);
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f1f5f9;
+            color: var(--dark);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1600px;
+            background: var(--white);
+            border-radius: 24px;
+            box-shadow: var(--shadow-xl);
+            overflow: hidden;
+            display: flex;
+            min-height: 90vh;
+            position: relative;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: var(--white);
+            border-right: 1px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            z-index: 50;
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            transform: translateX(-100%);
+            transition: transform 0.3s ease-in-out;
+            box-shadow: var(--shadow-xl);
+        }
+
+        .sidebar.active {
+            transform: translateX(0);
+        }
+
+        .sidebar-header {
+            padding: 30px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: var(--white);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .sidebar-header h2 {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: 1.5rem;
+            letter-spacing: -0.02em;
+        }
+
+        .close-sidebar {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            display: block;
+        }
+
+        .sidebar-content {
+            padding: 25px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .sidebar-section {
+            margin-bottom: 35px;
+        }
+
+        .sidebar-section h3 {
+            font-family: 'Outfit', sans-serif;
+            color: var(--gray);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 700;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .resource-list {
+            list-style: none;
+        }
+
+        .resource-list li {
+            margin-bottom: 10px;
+        }
+
+        .resource-list a {
+            color: var(--dark);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border-radius: 12px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-weight: 500;
+            border: 1px solid transparent;
+        }
+
+        .resource-list a:hover {
+            background: #eff6ff;
+            color: var(--primary);
+            border-color: #bfdbfe;
+            transform: translateX(4px);
+        }
+
+        .video-card {
+            background: var(--white);
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .video-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary);
+        }
+
+        .video-thumbnail {
+            height: 140px;
+            background: linear-gradient(45deg, #cbd5e1, #94a3b8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .video-thumbnail::after {
+            content: '▶';
+            font-size: 2rem;
+            color: white;
+            background: rgba(0, 0, 0, 0.3);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(4px);
+            transition: all 0.3s;
+        }
+
+        .video-card:hover .video-thumbnail::after {
+            transform: scale(1.1);
+            background: var(--primary);
+        }
+
+        .video-info {
+            padding: 15px;
+        }
+
+        .video-title {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+            color: var(--dark);
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .contact-box {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: var(--white);
+            padding: 25px;
+            border-radius: 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .contact-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at top right, rgba(255, 255, 255, 0.2), transparent);
+        }
+
+        .contact-btn {
+            display: inline-block;
+            background: var(--white);
+            color: var(--primary);
+            padding: 12px 24px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 700;
+            margin-top: 15px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .contact-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Main Content */
+        .main-content-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background: #f8fafc;
+            width: 100%;
+        }
+
+        .header {
+            background: var(--white);
+            padding: 40px;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            gap: 30px;
+            position: relative;
+        }
+
+        .menu-btn {
+            background: none;
+            border: none;
+            font-size: 1.8rem;
+            cursor: pointer;
+            color: var(--dark);
+            margin-right: 10px;
+            display: block;
+        }
+
+        .logo-img {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+            filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+        }
+
+        .header-text h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, var(--dark) 0%, var(--primary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header-text p {
+            color: var(--gray);
+            font-size: 1.1rem;
+        }
+
+        .content {
+            padding: 40px;
+            overflow-y: auto;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: var(--white);
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid #e2e8f0;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary);
+        }
+
+        .stat-card h3 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 5px;
+        }
+
+        .stat-card p {
+            color: var(--gray);
+            font-weight: 500;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.05em;
+        }
+
+        .stat-card::after {
+            content: '';
+            position: absolute;
+            right: -20px;
+            top: -20px;
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, var(--primary), transparent);
+            opacity: 0.1;
+            border-radius: 50%;
+        }
+
+        /* Search Section */
+        .search-container {
+            background: var(--white);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid #e2e8f0;
+            margin-bottom: 30px;
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 25px;
+        }
+
+        .search-box label {
+            display: block;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 10px;
+            font-size: 0.95rem;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 14px 18px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-family: 'Inter', sans-serif;
+            font-size: 1rem;
+            transition: all 0.3s;
+            background: #f8fafc;
+        }
+
+        .search-input:focus {
+            background: var(--white);
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+            outline: none;
+        }
+
+        /* Table */
+        .table-container {
+            background: var(--white);
+            border-radius: 20px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: #f8fafc;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        th {
+            padding: 20px;
+            text-align: left;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+            color: var(--gray);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        td {
+            padding: 20px;
+            border-bottom: 1px solid #f1f5f9;
+            color: var(--dark);
+            font-size: 0.95rem;
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        tbody tr:hover {
+            background: #f8fafc;
+        }
+
+        .category-badge {
+            padding: 6px 12px;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Dynamic Badge Colors */
+        tr:nth-child(4n+1) .category-badge {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        tr:nth-child(4n+2) .category-badge {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        tr:nth-child(4n+3) .category-badge {
+            background: #fce7f3;
+            color: #9d174d;
+        }
+
+        tr:nth-child(4n+4) .category-badge {
+            background: #ffedd5;
+            color: #9a3412;
+        }
+
+        /* Overlay */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 40;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .overlay.active {
+            display: block;
+            opacity: 1;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .container {
+                flex-direction: column;
+                height: auto;
+            }
+
+            .search-container {
+                grid-template-columns: 1fr;
+            }
+
+            .header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .menu-btn {
+                position: absolute;
+                top: 20px;
+                left: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Overlay -->
+        <div class="overlay" id="overlay"></div>
+
+        <!-- Sidebar -->
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2>🧠 Mind Care</h2>
+                <button class="close-sidebar" id="closeSidebar">×</button>
+            </div>
+            <div class="sidebar-content">
+                <div class="sidebar-section">
+                    <h3>📚 Psychoeducation</h3>
+                    <ul class="resource-list">
+                        <li><a href="#" onclick="alert('Resource coming soon!')">📄 Understanding Anxiety</a></li>
+                        <li><a href="#" onclick="alert('Resource coming soon!')">🌙 Sleep Hygiene Guide</a></li>
+                        <li><a href="#" onclick="alert('Resource coming soon!')">🧘‍♂️ Mindfulness Basics</a></li>
+                        <li><a href="#" onclick="alert('Resource coming soon!')">🛑 Recognizing Burnout</a></li>
+                        <li><a href="#" onclick="alert('Resource coming soon!')">🤝 Helping a Friend</a></li>
+                    </ul>
+                </div>
+
+                <div class="sidebar-section">
+                    <h3>🎬 Wellness Videos</h3>
+                    <div class="video-card">
+                        <a href="https://www.youtube.com/results?search_query=student+mental+health" target="_blank"
+                            style="text-decoration: none;">
+                            <div class="video-thumbnail">
+                                <span>▶️ Play Video</span>
+                            </div>
+                            <div class="video-info">
+                                <span class="video-title">Student Mental Health Guide</span>
+                                <span style="font-size: 0.8rem; color: #64748b;">Tips for academic stress</span>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="video-card">
+                        <a href="https://www.youtube.com/results?search_query=workplace+mental+health" target="_blank"
+                            style="text-decoration: none;">
+                            <div class="video-thumbnail">
+                                <span>▶️ Play Video</span>
+                            </div>
+                            <div class="video-info">
+                                <span class="video-title">Workplace Wellness</span>
+                                <span style="font-size: 0.8rem; color: #64748b;">Managing professional life</span>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <div class="contact-box">
+                        <h3>📞 Need Help?</h3>
+                        <p style="font-size: 0.9rem; margin-top: 10px; opacity: 0.9;">We are here to listen and support
+                            you.</p>
+                        <a href="tel:8280117000" class="contact-btn">Call CWC</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content-wrapper">
+            <div class="header">
+                <button class="menu-btn" id="menuBtn">☰</button>
+                <div class="logo-container">
+                    <img src="./logo.png" alt="AIIMS Bhubaneswar Logo" class="logo-img">
+                </div>
+                <div class="header-text">
+                    <h1>Campus Buddy Directory</h1>
+                    <p>AIIMS Bhubaneswar Student Database</p>
+                </div>
+            </div>
+
+            <div class="content">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3 id="totalStudents">0</h3>
+                        <p>Total Students</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="totalHostels">0</h3>
+                        <p>Hostels</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="totalCategories">0</h3>
+                        <p>Categories</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="totalBatches">0</h3>
+                        <p>Batches</p>
+                    </div>
+                </div>
+
+                <div class="search-container">
+                    <div class="search-box">
+                        <label>🔍 Universal Search</label>
+                        <input type="text" id="universalSearch" class="search-input" placeholder="Search anything...">
+                    </div>
+                    <div class="search-box">
+                        <label>🎓 Batch Wise</label>
+                        <select id="batchSearch" class="search-input">
+                            <option value="">All Batches</option>
+                        </select>
+                    </div>
+                    <div class="search-box">
+                        <label>🏢 Block Wise</label>
+                        <select id="blockSearch" class="search-input">
+                            <option value="">All Blocks</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table id="dataTable">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Name</th>
+                                <th>Category</th>
+                                <th>Batch/Year</th>
+                                <th>Phone Number</th>
+                                <th>Hostel Address</th>
+                                <th>Email</th>
+                                <th>Alt Phone</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const studentsData = [
+            { "id": 1, "Name": "Parambrata Chattopadhyaya", "Category": "MBBS Student", "Batch/Year of joining": 2025, "Address (Hostel)": "Block F - Room 203", "Contact mail ID": "N/A", "Phone number": "9735437706", "altPhone": "9735437706" },
+            { "id": 2, "Name": "Debjit Roy", "Category": "MBBS Student", "Batch/Year of joining": 2025, "Address (Hostel)": "Block F - Room 212", "Contact mail ID": "N/A", "Phone number": "6295144115", "altPhone": "6295144115" },
+            { "id": 3, "Name": "Md. Wasim", "Category": "Paramedical Student", "Batch/Year of joining": 2025, "Address (Hostel)": "Block F - Room 510", "Contact mail ID": "N/A", "Phone number": "7004855556", "altPhone": "7004855556" },
+            { "id": 4, "Name": "Adyasha Anuradha Jena", "Category": "MBBS Student", "Batch/Year of joining": 2025, "Address (Hostel)": "Type IIA - Room 29", "Contact mail ID": "N/A", "Phone number": "8867423502", "altPhone": "8867423502" },
+            { "id": 5, "Name": "Sreejayee Kundu", "Category": "BSc Nursing Student", "Batch/Year of joining": 2025, "Address (Hostel)": "Type IIA - Room 18", "Contact mail ID": "N/A", "Phone number": "9692370286", "altPhone": "9692370286" },
+            { "id": 6, "Name": "Aishi Aditya", "Category": "BSc Nursing Student", "Batch/Year of joining": 2025, "Address (Hostel)": "Type IIA - Room 26", "Contact mail ID": "N/A", "Phone number": "9564188738", "altPhone": "9564188738" },
+            { "id": 7, "Name": "Shristi Sharma", "Category": "BSc Paramedical Student", "Batch/Year of joining": 2025, "Address (Hostel)": "Type IIA - Room 05", "Contact mail ID": "N/A", "Phone number": "8887850788", "altPhone": "8887850788" },
+            { "id": 8, "Name": "Dr Zafar Mahmood", "Category": "Junior Resident", "Batch/Year of joining": 2023, "Address (Hostel)": "PG2", "Contact mail ID": "zafar.mahmood007@gmail.com", "Phone number": "9801801184", "altPhone": "9801801184" },
+            { "id": 9, "Name": "Sayantika Dutta", "Category": "MSc Nursing Student", "Batch/Year of joining": 2024, "Address (Hostel)": "PG-1B", "Contact mail ID": "sduttakandi742137@gmail.com", "Phone number": "8918738619", "altPhone": "8918738619" },
+            { "id": 10, "Name": "Shrayanti sahana", "Category": "MSc Nursing Student", "Batch/Year of joining": 2024, "Address (Hostel)": "PG-1B", "Contact mail ID": "sshrayanti@gmail.com", "Phone number": "9007438347", "altPhone": "9007438347" },
+            { "id": 11, "Name": "Raksha", "Category": "MSc Nursing Student", "Batch/Year of joining": 2023, "Address (Hostel)": "PG-1B", "Contact mail ID": "rakshameghwal2@gmail.com", "Phone number": "8290864007", "altPhone": "8290864007" },
+            { "id": 12, "Name": "Aarti", "Category": "MSc Nursing Student", "Batch/Year of joining": 2024, "Address (Hostel)": "Pg2 hostel", "Contact mail ID": "sumit9213389706@gmail.com", "Phone number": "8178849897", "altPhone": "9213389706" },
+            { "id": 13, "Name": "Duyu Otung", "Category": "MSc Nursing Student", "Batch/Year of joining": 2023, "Address (Hostel)": "PG-1B", "Contact mail ID": "otungdu@gmail.com", "Phone number": "7640987632", "altPhone": "7640987632" },
+            { "id": 14, "Name": "Sudipta Roy", "Category": "MSc Nursing Student", "Batch/Year of joining": 2024, "Address (Hostel)": "PG-1B", "Contact mail ID": "roysudipta288@gmail.com", "Phone number": "07679175797", "altPhone": "07679175797" },
+            { "id": 15, "Name": "Ruchi Patel", "Category": "MSc Nursing Student", "Batch/Year of joining": 2023, "Address (Hostel)": "PG-2", "Contact mail ID": "ruchipriya8504@gmail.com", "Phone number": "6205700162", "altPhone": "6205700162" },
+            { "id": 16, "Name": "Punam Biswas", "Category": "MSc Nursing Student", "Batch/Year of joining": 2023, "Address (Hostel)": "PG-1B", "Contact mail ID": "biswaspoonam68@gmail.com", "Phone number": "9007986350", "altPhone": "8637572990" },
+            { "id": 17, "Name": "Soumita Mahata", "Category": "MSc Nursing Student", "Batch/Year of joining": 2023, "Address (Hostel)": "PG-1B", "Contact mail ID": "soumita1126@gmail.com", "Phone number": "8927848045", "altPhone": "8820855737" },
+            { "id": 18, "Name": "Soumita Dey", "Category": "MSc Nursing Student", "Batch/Year of joining": 2024, "Address (Hostel)": "PG-1B", "Contact mail ID": "chutkidey1999@gmail.com", "Phone number": "07679328810", "altPhone": "7384948247" },
+            { "id": 19, "Name": "Vani", "Category": "MSc Nursing Student", "Batch/Year of joining": 2023, "Address (Hostel)": "PG-1B", "Contact mail ID": "Vani36406@gmail.com", "Phone number": "6206393709", "altPhone": "6206393709" },
+            { "id": 20, "Name": "Jiteshwari sahu", "Category": "MSc Nursing Student", "Batch/Year of joining": 2024, "Address (Hostel)": "AIIMS Bhubaneswar", "Contact mail ID": "jiteshwarisahu2903@gmail.com", "Phone number": "8770723997", "altPhone": "7999781377" },
+            { "id": 21, "Name": "Sakshi suman", "Category": "MSc Nursing Student", "Batch/Year of joining": 2023, "Address (Hostel)": "PG-1B", "Contact mail ID": "Sakshisumanbgs@gmail.com", "Phone number": "7979061049", "altPhone": "7979061049" },
+            { "id": 22, "Name": "SONAL KUMARI", "Category": "MSc Nursing Student", "Batch/Year of joining": 2024, "Address (Hostel)": "PG-1B", "Contact mail ID": "sonal123fg@gmail.com", "Phone number": "7209399633", "altPhone": "7209399633" },
+            { "id": 23, "Name": "Priya bharti", "Category": "BSc Nursing Student", "Batch/Year of joining": 2023, "Address (Hostel)": "Hostel A aiims bhubaneswar", "Contact mail ID": "priyabharti9014@gmail.com", "Phone number": "9932702450", "altPhone": "None" },
+            { "id": 24, "Name": "Abhipsa", "Category": "BSc Nursing Student", "Batch/Year of joining": 2023, "Address (Hostel)": "Block A", "Contact mail ID": "abhipsad2003@gmail.com", "Phone number": "07894596603", "altPhone": "9668517780" },
+            { "id": 25, "Name": "Megha ghosh", "Category": "BSc Nursing Student", "Batch/Year of joining": 2023, "Address (Hostel)": "Block A", "Contact mail ID": "Megha.ghosh.mou@gmail.com", "Phone number": "7003016846", "altPhone": "9903184229" },
+            { "id": 26, "Name": "Khushnuma Parveen", "Category": "BSc Nursing Student", "Batch/Year of joining": 2023, "Address (Hostel)": "Hostel A block Aiims bhubaneswar", "Contact mail ID": "khushnumaparveen086@gmail.com", "Phone number": "6206913856", "altPhone": "8579080180" },
+            { "id": 27, "Name": "Rasmita Dash", "Category": "BSc Nursing Student", "Batch/Year of joining": 2024, "Address (Hostel)": "Type 2 A", "Contact mail ID": "dashrasmita95@gmail.com", "Phone number": "9337322819", "altPhone": "8917420383" },
+            { "id": 28, "Name": "Ritu Raj", "Category": "BSc Nursing Student", "Batch/Year of joining": 2023, "Address (Hostel)": "Block A", "Contact mail ID": "avantikaraj665@gmail.com", "Phone number": "9128416783", "altPhone": "8409458239" },
+            { "id": 29, "Name": "Faith Mol Vijoy", "Category": "BSc Nursing Student", "Batch/Year of joining": 2024, "Address (Hostel)": "Type 2A", "Contact mail ID": "faithmol0345@gmail.com", "Phone number": "9895724353", "altPhone": "9895724353" },
+            { "id": 30, "Name": "Kiran", "Category": "BSc Nursing Student", "Batch/Year of joining": 2021, "Address (Hostel)": "PG-1B", "Contact mail ID": "saikiru2000@gmail.com", "Phone number": "8456027925", "altPhone": "8456027925" },
+            { "id": 31, "Name": "Dimpi Das", "Category": "BSc Nursing Student", "Batch/Year of joining": "W0", "Address (Hostel)": "PG-1B", "Contact mail ID": "Dimpi120das@gmail.com", "Phone number": "9864967972", "altPhone": "9864967972" },
+            { "id": 32, "Name": "Anjima rajeev", "Category": "BSc Nursing Student", "Batch/Year of joining": 2022, "Address (Hostel)": "Block A", "Contact mail ID": "anjimarajeev03@gmail.com", "Phone number": "9497121465", "altPhone": "9497121465" },
+            { "id": 33, "Name": "Harshini", "Category": "BSc Nursing Student", "Batch/Year of joining": 2022, "Address (Hostel)": "Hostel A, AIIMS Bhubaneswar", "Contact mail ID": "harshini.snair@gmail.com", "Phone number": "7356074266", "altPhone": "7356074266" },
+            { "id": 34, "Name": "ANUJA AMMAL MA", "Category": "BSc Nursing Student", "Batch/Year of joining": 2022, "Address (Hostel)": "Block A", "Contact mail ID": "ammal.anuja@gmail.com", "Phone number": "8590344070", "altPhone": "8590344070" },
+            { "id": 35, "Name": "Pooja", "Category": "BSc Nursing Student", "Batch/Year of joining": 2022, "Address (Hostel)": "Block A girls hostel", "Contact mail ID": "poojanehra2003@gmail.com", "Phone number": "8854932462", "altPhone": "9694430104" },
+            { "id": 36, "Name": "Ayantika Dana", "Category": "BSc Nursing Student", "Batch/Year of joining": 2022, "Address (Hostel)": "Block A ,AIIMS Residential Complex", "Contact mail ID": "ayantikadana2003@gmail.com", "Phone number": "8918383638", "altPhone": "8918383638" },
+            { "id": 37, "Name": "Bilkis Sardar", "Category": "BSc Nursing Student", "Batch/Year of joining": 2021, "Address (Hostel)": "PG1B hostel campus", "Contact mail ID": "bilkissardar625@gmail.com", "Phone number": "7047853040", "altPhone": "7047853040" },
+            { "id": 38, "Name": "Abhaya santhosh", "Category": "BSc Nursing Student", "Batch/Year of joining": 2022, "Address (Hostel)": "Block A", "Contact mail ID": "abhayasanthosh21@gmail.com", "Phone number": "9496761180", "altPhone": "9496761180" },
+            { "id": 39, "Name": "Preeti Gupta", "Category": "BSc Nursing Student", "Batch/Year of joining": 2022, "Address (Hostel)": "a block", "Contact mail ID": "pg994743@gmail.com", "Phone number": "7827287134", "altPhone": "7827287134" },
+            { "id": 40, "Name": "Minarva Biswal", "Category": "BSc Nursing Student", "Batch/Year of joining": 2022, "Address (Hostel)": "A block", "Contact mail ID": "minarvabiswal09@gmail.com", "Phone number": "7303944045", "altPhone": "7303944045" },
+            { "id": 41, "Name": "Anjali soni", "Category": "BSc Nursing Student", "Batch/Year of joining": 2021, "Address (Hostel)": "PG-1B", "Contact mail ID": "anjalisoni5355@gmail.com", "Phone number": "08302804871", "altPhone": "7357922298" },
+            { "id": 42, "Name": "Aditi Bairagi", "Category": "BSc Nursing Student", "Batch/Year of joining": 2022, "Address (Hostel)": "Block-A ,Aiims residential complex", "Contact mail ID": "aditibairagi08@gmail.com", "Phone number": "8927643816", "altPhone": "No" },
+            { "id": 43, "Name": "Aaliya S", "Category": "BSc Nursing Student", "Batch/Year of joining": 2022, "Address (Hostel)": "Block A Hostel", "Contact mail ID": "aaliyasilja@gmail.com", "Phone number": "9207066291", "altPhone": "9207066291" },
+            { "id": 44, "Name": "Runa Khatun", "Category": "BSc Nursing Student", "Batch/Year of joining": 2022, "Address (Hostel)": "Hostel A", "Contact mail ID": "runakhatun8911@gmail.com", "Phone number": "8597245414", "altPhone": "8597245414" },
+            { "id": 45, "Name": "Tamanna Murshid", "Category": "BSc Nursing Student", "Batch/Year of joining": 2022, "Address (Hostel)": "Block A", "Contact mail ID": "Murshid Tamanna @gmail.com", "Phone number": "8250418627", "altPhone": "9735438526" },
+            { "id": 46, "Name": "Aziza Khatun", "Category": "BSc Nursing Student", "Batch/Year of joining": 2022, "Address (Hostel)": "Hostel A", "Contact mail ID": "aziza.khatun29813@gmail.com", "Phone number": "7679493608", "altPhone": "7679493608" },
+            { "id": 47, "Name": "Priyata", "Category": "BSc Nursing Student", "Batch/Year of joining": 2022, "Address (Hostel)": "Block A", "Contact mail ID": "priyatamushib@gmail.com", "Phone number": "8967784136", "altPhone": "8967784136" },
+            { "id": 48, "Name": "Kiran Choudhary", "Category": "BSc Nursing Student", "Batch/Year of joining": 2022, "Address (Hostel)": "Hostel A", "Contact mail ID": "kiranchoudharyavsk@gmail.com", "Phone number": "8824773212", "altPhone": "8824773212" },
+            { "id": 49, "Name": "Silpa Rajan", "Category": "BSc Nursing Student", "Batch/Year of joining": 2022, "Address (Hostel)": "Hostel A", "Contact mail ID": "silpar@gmail.com", "Phone number": "7510775658", "altPhone": "7510775658" },
+            { "id": 50, "Name": "Riya Kumari", "Category": "BSc Nursing Student", "Batch/Year of joining": 2021, "Address (Hostel)": "PG-1B", "Contact mail ID": "riyaaiimsbbsr1410@gmail.com", "Phone number": "8674887527", "altPhone": "9264113419" },
+            { "id": 51, "Name": "Sonam Tsomo", "Category": "BSc Nursing Student", "Batch/Year of joining": 2022, "Address (Hostel)": "Hostel A", "Contact mail ID": "sonamtsomo1317@gmail.com", "Phone number": "7876812528", "altPhone": "7876812528" },
+            { "id": 52, "Name": "Ayush Kumar", "Category": "MBBS Student", "Batch/Year of joining": 2024, "Address (Hostel)": "Hostel F", "Contact mail ID": "ayushdav10686@gmail.com", "Phone number": "6355488546", "altPhone": "6201295935" },
+            { "id": 53, "Name": "Debaditya Shankar", "Category": "MBBS Student", "Batch/Year of joining": 2024, "Address (Hostel)": "F block", "Contact mail ID": "debadityashankar@gmail.com", "Phone number": "9091371947", "altPhone": "9091371947" },
+            { "id": 54, "Name": "Adarsh P", "Category": "MBBS Student", "Batch/Year of joining": 2024, "Address (Hostel)": "F block", "Contact mail ID": "adarshp212121@gmail.com", "Phone number": "9447202734", "altPhone": "9447202734" },
+            { "id": 55, "Name": "Abhiram", "Category": "MBBS Student", "Batch/Year of joining": 2024, "Address (Hostel)": "hostel F", "Contact mail ID": "abhiram2723075@gmail.com", "Phone number": "8714874535", "altPhone": "8714974535" },
+            { "id": 56, "Name": "Ishan Gohil", "Category": "MBBS Student", "Batch/Year of joining": 2024, "Address (Hostel)": "Hostel F", "Contact mail ID": "gohilishan2005@gmail.com", "Phone number": "9023878478", "altPhone": "9023878478" },
+            { "id": 57, "Name": "Rima Bibhar", "Category": "MBBS Student", "Batch/Year of joining": 2024, "Address (Hostel)": "Type-2A girls hostel", "Contact mail ID": "Reemabibhar2@gmail.com", "Phone number": "7008530813", "altPhone": "7008530813" },
+            { "id": 58, "Name": "Anuran Ghosh", "Category": "MBBS Student", "Batch/Year of joining": 2024, "Address (Hostel)": "Hostel F near director's lawn", "Contact mail ID": "dark.anuran18@gmail.com", "Phone number": "8482081859", "altPhone": "NA" },
+            { "id": 59, "Name": "Aditya Prakash Sethy", "Category": "MBBS Student", "Batch/Year of joining": 2023, "Address (Hostel)": "Room 810 , B BLOCK", "Contact mail ID": "adityaprakash3011@gmail.com", "Phone number": "9337935360", "altPhone": "9337935360" },
+            { "id": 60, "Name": "Mohit Mohapatra", "Category": "MBBS Student", "Batch/Year of joining": 2023, "Address (Hostel)": "Hostel Block- B", "Contact mail ID": "mohitmohapatra1601@gmail.com", "Phone number": "7077885254", "altPhone": "7077885254" },
+            { "id": 61, "Name": "Surya Pratap Mishra", "Category": "MBBS Student", "Batch/Year of joining": 2023, "Address (Hostel)": "Block B", "Contact mail ID": "suryapratapmishra08@gmail.com", "Phone number": "9124913841", "altPhone": "8328804965" },
+            { "id": 62, "Name": "Thakasi Srilakshmi Sai Tejaswini", "Category": "MBBS Student", "Batch/Year of joining": 2023, "Address (Hostel)": "Block E", "Contact mail ID": "saitejaswini1607@gmail.com", "Phone number": "8885217667", "altPhone": "9908160561" },
+            { "id": 63, "Name": "Sourajit Mohanty", "Category": "MBBS Student", "Batch/Year of joining": 2023, "Address (Hostel)": "Hostel B", "Contact mail ID": "sourajit2003@gmail.com", "Phone number": "6392171281", "altPhone": "8765630135" },
+            { "id": 64, "Name": "Prajwal H M", "Category": "MBBS Student", "Batch/Year of joining": 2024, "Address (Hostel)": "F Block Room number 405", "Contact mail ID": "prajwalhm2006@gmail.com", "Phone number": "7899139904", "altPhone": "7899139904" },
+            { "id": 65, "Name": "NANDRAM MAHAWAR", "Category": "Nursing Officer", "Batch/Year of joining": 2018, "Address (Hostel)": "Uday giri vihar patra para", "Contact mail ID": "nrmahawar109@gmail.com", "Phone number": "6377447824", "altPhone": "874004251" },
+            { "id": 66, "Name": "Sarthak Mohanty", "Category": "Nursing Officer", "Batch/Year of joining": 2019, "Address (Hostel)": "Patrapada", "Contact mail ID": "smohanty.aiph@gmail.com", "Phone number": "9040543542", "altPhone": "7008073473" },
+            { "id": 67, "Name": "Smita Rani Mahapatro", "Category": "Nursing Officer", "Batch/Year of joining": 2014, "Address (Hostel)": "Gen Med ward E6", "Contact mail ID": "smitarani.mahapatro@gmail.com", "Phone number": "09776704483", "altPhone": "09776704483" },
+            { "id": 68, "Name": "Archana Dalai", "Category": "Nursing Officer", "Batch/Year of joining": 2014, "Address (Hostel)": "Ransinghpur", "Contact mail ID": "adalai.itr@gmail.com", "Phone number": "8018435215", "altPhone": "7978234134" },
+            { "id": 69, "Name": "Mandakinj mandal", "Category": "Nursing Officer", "Batch/Year of joining": 2918, "Address (Hostel)": "Sr residency. Udaygirivihar, patrapara", "Contact mail ID": "mandakinimandal2014@gmail.com", "Phone number": "9583736801", "altPhone": "9337001331" },
+            { "id": 70, "Name": "Jyotiranjan Rout", "Category": "Nursing Officer", "Batch/Year of joining": 2016, "Address (Hostel)": "Ayush ward", "Contact mail ID": "rout jyoti81@gmail.com", "Phone number": "8763025343", "altPhone": "7978460867" },
+            { "id": 71, "Name": "Krishna Yadav Kattagoni", "Category": "Nursing Officer", "Batch/Year of joining": 2021, "Address (Hostel)": "Trauma and Emergency Ward", "Contact mail ID": "k.krishnayadav86@gmail.com", "Phone number": "9442853852", "altPhone": "9491157125" },
+            { "id": 72, "Name": "Linda Jennifer S", "Category": "Nursing Officer", "Batch/Year of joining": 2021, "Address (Hostel)": "Kalinga vihar", "Contact mail ID": "nurs_linda@aiimsbhubaneswar.edu.in", "Phone number": "9442891256", "altPhone": "9640231017" },
+            { "id": 73, "Name": "Sooryanarayan C", "Category": "MBBS Student", "Batch/Year of joining": 2021, "Address (Hostel)": "Pg1A - 513", "Contact mail ID": "nsoorya6@gmail.com", "Phone number": "7022003064", "altPhone": "7022003064" },
+            { "id": 74, "Name": "Debanjan Ruj", "Category": "MBBS Student", "Batch/Year of joining": 2021, "Address (Hostel)": "PG 1A", "Contact mail ID": "debanjanruj@gmail.com", "Phone number": "9606598964", "altPhone": "9606598964" },
+            { "id": 75, "Name": "Kirti raj", "Category": "MBBS Student", "Batch/Year of joining": 2019, "Address (Hostel)": "Hostel C", "Contact mail ID": "rajkirti2002@gmail.com", "Phone number": "07978030864", "altPhone": "07978030864" },
+            { "id": 76, "Name": "Dr.Pranjal Kumar", "Category": "Interns (MBBS)", "Batch/Year of joining": 2020, "Address (Hostel)": "C Block Room 314", "Contact mail ID": "pranjalkumaraiims@gmail.com", "Phone number": "7679446450", "altPhone": "9800733800" },
+            { "id": 77, "Name": "Devasis sahoo", "Category": "MBBS Student", "Batch/Year of joining": 2021, "Address (Hostel)": "Pg1A", "Contact mail ID": "devasissahoo0012@gmail.com", "Phone number": "9861492793", "altPhone": "9861492793" },
+            { "id": 78, "Name": "Sambit Kumar Naik", "Category": "MBBS Student", "Batch/Year of joining": 2021, "Address (Hostel)": "Room no- 706, PG-1A , Residential complex , AIIMS Bhubaneswar", "Contact mail ID": "sambitku2001@gmail.com", "Phone number": "8763090886", "altPhone": "8763090886" },
+            { "id": 79, "Name": "Sudit Saran Bakra", "Category": "MBBS Student", "Batch/Year of joining": "2021/2022 February", "Address (Hostel)": "D block", "Contact mail ID": "suditsaranbakra@gmail.com", "Phone number": "7679494271", "altPhone": "7679494271" },
+            { "id": 80, "Name": "Kousik Sahoo", "Category": "MBBS Student", "Batch/Year of joining": 2022, "Address (Hostel)": "Block-B", "Contact mail ID": "koushiksahoo.kks@gmail.com", "Phone number": "9439649571", "altPhone": "9439649571" },
+            { "id": 81, "Name": "Suyash Soni", "Category": "MBBS Student", "Batch/Year of joining": 2022, "Address (Hostel)": "B Block", "Contact mail ID": "suyash.bharatiya77@gmail.com", "Phone number": "9762851264", "altPhone": "9834007595" },
+            { "id": 82, "Name": "Anudh Mishra", "Category": "MBBS Student", "Batch/Year of joining": 2022, "Address (Hostel)": "B block", "Contact mail ID": "omswayammishra29@gmail.com", "Phone number": "9467322623", "altPhone": "9891914459" }
+        ];
+
+        // Initialize on page load
+        window.addEventListener('DOMContentLoaded', function () {
+            populateFilters(); // Populate dropdowns first
+            populateTable();
+            updateStatistics();
+
+            // Add event listeners
+            document.getElementById('universalSearch').addEventListener('input', filterTable);
+            document.getElementById('batchSearch').addEventListener('change', filterTable);
+            document.getElementById('blockSearch').addEventListener('change', filterTable);
+
+            // Sidebar Toggle Logic
+            const menuBtn = document.getElementById('menuBtn');
+            const closeSidebar = document.getElementById('closeSidebar');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+
+            function toggleSidebar() {
+                sidebar.classList.toggle('active');
+                overlay.classList.toggle('active');
+            }
+
+            menuBtn.addEventListener('click', toggleSidebar);
+            closeSidebar.addEventListener('click', toggleSidebar);
+            overlay.addEventListener('click', toggleSidebar);
+        });
+
+        function populateFilters() {
+            const batchSelect = document.getElementById('batchSearch');
+            const blockSelect = document.getElementById('blockSearch');
+
+            // Get unique batches and sort them
+            const batches = [...new Set(studentsData.map(s => String(s['Batch/Year of joining'])))].sort();
+            batches.forEach(batch => {
+                const option = document.createElement('option');
+                option.value = batch;
+                option.textContent = batch;
+                batchSelect.appendChild(option);
+            });
+
+            // Get unique blocks/hostels and sort them
+            const blocks = [...new Set(studentsData.map(s => String(s['Address (Hostel)'])))].sort();
+            blocks.forEach(block => {
+                const option = document.createElement('option');
+                option.value = block;
+                option.textContent = block;
+                blockSelect.appendChild(option);
+            });
+        }
+
+        function filterTable() {
+            const universalTerm = document.getElementById('universalSearch').value.toLowerCase();
+            const batchTerm = document.getElementById('batchSearch').value.toLowerCase();
+            const blockTerm = document.getElementById('blockSearch').value.toLowerCase();
+
+            const filteredData = studentsData.filter(student => {
+                // Universal Search
+                const allText = Object.values(student).join(' ').toLowerCase();
+                const matchesUniversal = allText.includes(universalTerm);
+
+                // Batch Search
+                const batch = String(student['Batch/Year of joining']).toLowerCase();
+                const matchesBatch = batchTerm === "" || batch === batchTerm || batch.includes(batchTerm);
+
+                // Block Search
+                const hostel = String(student['Address (Hostel)']).toLowerCase();
+                const matchesBlock = blockTerm === "" || hostel === blockTerm || hostel.includes(blockTerm);
+
+                return matchesUniversal && matchesBatch && matchesBlock;
+            });
+
+            populateTable(filteredData);
+        }
+
+        function populateTable(data = studentsData) {
+            const tableBody = document.getElementById('tableBody');
+
+            if (data.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding: 20px;">No results found</td></tr>';
+                return;
+            }
+
+            tableBody.innerHTML = data.map(student => `
+            <tr>
+                <td>${student.id}</td>
+                <td><strong>${student.Name}</strong></td>
+                <td><span class="category-badge">${student.Category}</span></td>
+                <td>${student['Batch/Year of joining']}</td>
+                <td>${student['Phone number']}</td>
+                <td>${student['Address (Hostel)']}</td>
+                <td>${student['Contact mail ID']}</td>
+                <td>${student.altPhone || 'N/A'}</td>
+            </tr>
+        `).join('');
+        }
+
+        function updateStatistics() {
+            const hostels = [...new Set(studentsData.map(s => s['Address (Hostel)']).filter(h => h))];
+            const categories = [...new Set(studentsData.map(s => s.Category).filter(c => c))];
+            const batches = [...new Set(studentsData.map(s => s['Batch/Year of joining']).filter(b => b))];
+
+            document.getElementById('totalStudents').textContent = studentsData.length;
+            document.getElementById('totalHostels').textContent = hostels.length;
+            document.getElementById('totalCategories').textContent = categories.length;
+            document.getElementById('totalBatches').textContent = batches.length;
+        }
+    </script>
+</body>
+
+</html>
